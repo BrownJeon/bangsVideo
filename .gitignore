@@ -1,0 +1,5 @@
+## common ignore file
+node_modules
+package-lock.json
+
+.idea
