@@ -8,5 +8,8 @@ mixin video(video)
             li Posted #{video.createdAt}.
             li #{video.views} views.
         p=video.description
+        ul
+            each hashtag in video.hashtags
+                li=hashtag
         small=video.createdAt
         hr
