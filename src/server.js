@@ -4,6 +4,8 @@ import rootRouter from "./routers/rootRouter";
 import videoRouter from "./routers/videoRouter";
 import userRouter from "./routers/userRouter";
 import session from "express-session";
+import MongoStore from "connect-mongo";
+import { localsMiddleware } from "./middlewares";
 
 const app = express();
 
@@ -18,24 +20,17 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(
     session({
-        secret: "Hello!",
-        resave: true,
-        saveUninitialized: true,
+        secret: process.env.COOKIE_SECRET,
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+            maxAge: 18000000
+        },
+        store: MongoStore.create({ mongoUrl: process.env.DB_URL })
     })
 );
 
-app.use((req, res, next) => {
-    req.sessionStore.all((error, sessions) => {
-        console.log(sessions);
-        next();
-    });
-});
-
-app.get("/add-one", (req, res, next) => {
-    req.session.counter += 1;
-    return res.send(`${req.session.id} ${req.session.counter}`);
-});
-
+app.use(localsMiddleware);
 app.use("/", rootRouter);
 app.use("/user", userRouter);
 app.use("/videos", videoRouter);
