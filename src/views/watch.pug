@@ -1,4 +1,9 @@
 extends base
 
 block content
-    h1 watch video!
+    div
+        p=video.description
+        small=video.createdAt
+    a(href=`${video.id}/edit`) Edit Video &rarr;
+    br
+    a(href=`${video.id}/delete`) Delete Video &rarr;
