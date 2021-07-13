@@ -183,13 +183,13 @@ export const postChangePassword = async (req, res) => {
     if (!ok) {
         return res.status(400).render("users/change-password", {
             pageTitle: "Change Password",
-            errorMessage: "The current password is incorrect",
+            errorMessage: "현재 비밀번호가 맞지 않습니다.",
         });
     }
     if (newPassword !== newPasswordConfirmation) {
         return res.status(400).render("users/change-password", {
             pageTitle: "Change Password",
-            errorMessage: "The password does not match the confirmation",
+            errorMessage: "입력하신 비밀번호가 맞지 않습니다.",
         });
     }
     user.password = newPassword;
