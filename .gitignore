@@ -1,6 +1,9 @@
 ## common ignore file
 node_modules
 .env
+/uploads
+.DS_Store
+
 package-lock.json
 
 .idea
