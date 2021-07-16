@@ -2,6 +2,7 @@
 node_modules
 .env
 /uploads
+/assets
 .DS_Store
 
 package-lock.json
