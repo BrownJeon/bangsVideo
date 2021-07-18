@@ -8,7 +8,7 @@ module.exports = {
     plugins: [
         new MiniCssExtractPlugin({
             filename: "css/styles.css",
-        })
+        }),
     ],
     output: {
         filename: "js/main.js",
