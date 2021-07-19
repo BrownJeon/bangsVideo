@@ -7,6 +7,8 @@
 @import "./components/shared.scss";
 @import "./components/forms.scss";
 @import "./components/social-login.scss";
+@import "./components/video-player.scss";
+
 
 // screens
 @import "./screens/search.scss";
@@ -15,8 +17,8 @@
 @import "./screens/edit-profile.scss";
 
 body {
-  background-color: red;
-  color: $bg;
+  background-color: $bg;
+  color: $red;
 }
 
 main {
