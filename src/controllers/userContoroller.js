@@ -1,6 +1,7 @@
 import User from "../models/User";
 import bcrypt from "bcrypt";
 import fetch from "node-fetch";
+import Video from "../models/Video";
 
 export const getJoin = (req, res) => res.render("join", {pageTitle: "Join"});
 export const postJoin = async (req, res) => {
@@ -39,9 +40,9 @@ export const postJoin = async (req, res) => {
 export const getLogin = (req, res) => res.render("login", {pageTitle: "Login"});
 
 export const postLogin = async (req, res) => {
-    const { username, password } = req.body;
+    const {username, password} = req.body;
     const pageTitle = "Login";
-    const user = await User.findOne({ username, socialOnly: false });
+    const user = await User.findOne({username, socialOnly: false});
     if (!user) {
         return res.status(400).render("login", {
             pageTitle,
@@ -93,7 +94,7 @@ export const finishGithubLogin = async (req, res) => {
         })
     ).json();
     if ("access_token" in tokenRequest) {
-        const { access_token } = tokenRequest;
+        const {access_token} = tokenRequest;
         const apiUrl = "https://api.github.com";
         const userData = await (
             await fetch(`${apiUrl}/user`, {
@@ -115,7 +116,7 @@ export const finishGithubLogin = async (req, res) => {
         if (!emailObj) {
             return res.redirect("/login");
         }
-        let user = await User.findOne({ email: emailObj.email });
+        let user = await User.findOne({email: emailObj.email});
         if (!user) {
             user = await User.create({
                 avatarUrl: userData.avatar_url,
@@ -137,8 +138,87 @@ export const finishGithubLogin = async (req, res) => {
 
 export const logout = (req, res) => {
     req.session.destroy();
+    req.flash("info", "Bye Bye");
     return res.redirect("/");
 };
 
-export const edit = (req, res) => res.send("Edit User");
-export const see = (req, res) => res.send("See User");
+export const getEdit = (req, res) => {
+    return res.render("edit-profile", {pageTitle: "Edit Profile"});
+};
+
+export const postEdit = async (req, res) => {
+    const {
+        session: {
+            user: { _id, avatarUrl }
+        },
+        body: {name, email, username, location},
+        file
+    } = req;
+    const updatedUser = await User.findByIdAndUpdate(_id,
+        {
+            avatarUrl: file ? file.path : avatarUrl,
+            name,
+            email,
+            username,
+            location,
+        },
+        {new: true}
+    );
+    req.session.user = updatedUser;
+    return res.redirect("/users/edit");
+};
+
+export const getChangePassword = (req, res) => {
+    if (req.session.user.socialOnly === true) {
+        req.flash("error", "Can't change password.");
+        return res.redirect("/");
+    }
+    return res.render("users/change-password", { pageTitle: "Change Password" });
+};
+
+export const postChangePassword = async (req, res) => {
+    const {
+        session: {
+            user: { _id },
+        },
+        body: { oldPassword, newPassword, newPasswordConfirmation },
+    } = req;
+    const user = await User.findById(_id);
+    const ok = await bcrypt.compare(oldPassword, user.password);
+    if (!ok) {
+        return res.status(400).render("users/change-password", {
+            pageTitle: "Change Password",
+            errorMessage: "현재 비밀번호가 맞지 않습니다.",
+        });
+    }
+    if (newPassword !== newPasswordConfirmation) {
+        return res.status(400).render("users/change-password", {
+            pageTitle: "Change Password",
+            errorMessage: "입력하신 비밀번호가 맞지 않습니다.",
+        });
+    }
+    user.password = newPassword;
+    await user.save();
+    req.flash("info", "Password updated");
+    return res.redirect("/users/logout");
+};
+
+export const see = async (req, res) => {
+    const { id } = req.params;
+    const user = await User.findById(id).populate({
+        path: "videos",
+        populate: {
+            path: "owner",
+            model: "User",
+        },
+    });
+    if (!user) {
+        return res.status(404).render("404", { pageTitle: "User not found." });
+    }
+    const videos = await Video.find({ owner: user._id });
+
+    return res.render("users/profile", {
+        pageTitle: user.name,
+        user
+    });
+};
