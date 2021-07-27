@@ -5,12 +5,10 @@ header
         ul
             li
                 a(href="/search")
-                    i.fa.fa-search
+                    i.fas.fa-search
             if loggedIn
                 li
                     a(href="/videos/upload") Upload Video
-                li
-                    a(href=`/users/${loggedInUser._id}`) My Profile
                 li
                     a(href="/users/edit") Edit Profile
                 li
@@ -20,10 +18,11 @@ header
                         if loggedInUser.avatarUrl === ""
                             span 😀
                         else
-                            if loggedInUser.socialOnly
-                                img.header__avatar(src=loggedInUser.avatarUrl)
-                            else
-                                img.header__avatar(src="/" + loggedInUser.avatarUrl)
+                            if loggedInUser.avatarUrl
+                                if loggedInUser.avatarUrl.includes("github")
+                                    img.header__avatar(src=loggedInUser.avatarUrl)
+                                else
+                                    img.header__avatar(src=loggedInUser.avatarUrl)
             else
                 li
                     a(href="/login")  Login
