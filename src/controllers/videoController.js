@@ -28,7 +28,7 @@ export const getEdit = async (req, res) => {
         return res.status(404).render("404", { pageTitle: "Video not found." });
     }
     if (String(video.owner) !== String(_id)) {
-        req.flash("error", "Not authorized");
+        req.flash("error", "페이지접근에 대하 권한 가지고있는 유저가 아닙니다.");
         return res.status(403).redirect("/");
     }
     return res.render("edit", { pageTitle: `Edit: ${video.title}`, video });
@@ -45,7 +45,7 @@ export const postEdit = async (req, res) => {
         return res.status(404).render("404", { pageTitle: "Video not found." });
     }
     if (String(video.owner) !== String(_id)) {
-        req.flash("error", "You are not the the owner of the video.");
+        req.flash("error", "비디오 정보 변경에 대한 권한 가지고있는 유저가 아닙니다.");
         return res.status(403).redirect("/");
     }
     await Video.findByIdAndUpdate(id, {
@@ -53,7 +53,7 @@ export const postEdit = async (req, res) => {
         description,
         hashtags: Video.formatHashtags(hashtags),
     });
-    req.flash("success", "Changes saved.");
+    req.flash("success", "정보가 변경되었습니다.");
     return res.redirect(`/videos/${id}`);
 };
 

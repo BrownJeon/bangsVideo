@@ -45,14 +45,14 @@ export const postLogin = async (req, res) => {
     if (!user) {
         return res.status(400).render("login", {
             pageTitle,
-            errorMessage: "An account with this username does not exists.",
+            errorMessage: "유저정보를 찾을 수 없습니다.",
         });
     }
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) {
         return res.status(400).render("login", {
             pageTitle,
-            errorMessage: "Wrong password",
+            errorMessage: "비밀번호가 맞지 않습니다.",
         });
     }
     req.session.loggedIn = true;
@@ -110,7 +110,6 @@ export const finishGithubLogin = async (req, res) => {
             (email) => email.primary === true && email.verified === true
         );
         if (!emailObj) {
-            // set notification
             return res.redirect("/login");
         }
         let user = await User.findOne({ email: emailObj.email });
@@ -135,7 +134,7 @@ export const finishGithubLogin = async (req, res) => {
 
 export const logout = (req, res) => {
     req.session.destroy();
-    req.flash("info", "Bye Bye");
+    req.flash("info", "logout!");
     return res.redirect("/");
 };
 export const getEdit = (req, res) => {
@@ -167,7 +166,7 @@ export const postEdit = async (req, res) => {
 
 export const getChangePassword = (req, res) => {
     if (req.session.user.socialOnly === true) {
-        req.flash("error", "Can't change password.");
+        req.flash("error", "social login의 경우 비밀번호를 변경할 수 없습니다.");
         return res.redirect("/");
     }
     return res.render("users/change-password", { pageTitle: "Change Password" });
@@ -184,18 +183,18 @@ export const postChangePassword = async (req, res) => {
     if (!ok) {
         return res.status(400).render("users/change-password", {
             pageTitle: "Change Password",
-            errorMessage: "The current password is incorrect",
+            errorMessage: "입력하신 현재 비밀번호가 맞지 않습니다.",
         });
     }
     if (newPassword !== newPasswordConfirmation) {
         return res.status(400).render("users/change-password", {
             pageTitle: "Change Password",
-            errorMessage: "The password does not match the confirmation",
+            errorMessage: "변경하실 비밀번호를 동일하게 입력해주세요.",
         });
     }
     user.password = newPassword;
     await user.save();
-    req.flash("info", "Password updated");
+    req.flash("info", "비밀번호가 변경되었습니다.");
     return res.redirect("/users/logout");
 };
 
