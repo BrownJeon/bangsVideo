@@ -9,14 +9,14 @@ export const postJoin = async (req, res) => {
     if (password !== password2) {
         return res.status(400).render("join", {
             pageTitle,
-            errorMessage: "Password confirmation does not match.",
+            errorMessage: "비밀번호가 맞지않습니다. 동일한 비밀번호를 입력해주세요.",
         });
     }
     const exists = await User.exists({ $or: [{ username }, { email }] });
     if (exists) {
         return res.status(400).render("join", {
             pageTitle,
-            errorMessage: "This username/email is already taken.",
+            errorMessage: "이미 존재하는 정보입니다. (username/email)",
         });
     }
     try {
@@ -134,7 +134,7 @@ export const finishGithubLogin = async (req, res) => {
 
 export const logout = (req, res) => {
     req.session.destroy();
-    req.flash("info", "logout!");
+
     return res.redirect("/");
 };
 export const getEdit = (req, res) => {
@@ -166,7 +166,8 @@ export const postEdit = async (req, res) => {
 
 export const getChangePassword = (req, res) => {
     if (req.session.user.socialOnly === true) {
-        req.flash("error", "social login의 경우 비밀번호를 변경할 수 없습니다.");
+
+        console.log("social login의 경우 비밀번호를 변경할 수 없습니다.");
         return res.redirect("/");
     }
     return res.render("users/change-password", { pageTitle: "Change Password" });
@@ -194,7 +195,8 @@ export const postChangePassword = async (req, res) => {
     }
     user.password = newPassword;
     await user.save();
-    req.flash("info", "비밀번호가 변경되었습니다.");
+
+    console.log("비밀번호가 변경되었습니다.");
     return res.redirect("/users/logout");
 };
 

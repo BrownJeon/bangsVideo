@@ -1,12 +1,12 @@
 import express from "express";
 import morgan from "morgan";
+import flash from "express-flash";
 import rootRouter from "./routers/rootRouter";
 import videoRouter from "./routers/videoRouter";
 import userRouter from "./routers/userRouter";
 import apiRouter from "./routers/apiRouter";
 import session from "express-session";
 import MongoStore from "connect-mongo";
-import flash from "express-flash";
 import { localsMiddleware } from "./middlewares";
 
 const app = express();
@@ -32,6 +32,7 @@ app.use(
         store: MongoStore.create({ mongoUrl: process.env.DB_URL })
     })
 );
+
 
 app.use(flash());
 app.use(localsMiddleware);
