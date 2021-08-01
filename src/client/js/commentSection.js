@@ -1,27 +1,31 @@
-const videoContainer = document.getElementById("videoContainer");
-const form = document.getElementById("commentForm");
+import Comment from "../../models/Comment";
+import Video from "../../models/Video";
 
-const addComment = (text, id) => {
+const videoContainer = document.getElementById("videoContainer");
+const createForm = document.getElementById("createCommentForm");
+const deleteForm = document.getElementById("deleteCommentForm");
+
+const addComment = (text, id, username) => {
     const videoComments = document.querySelector(".video__comments ul");
     const newComment = document.createElement("li");
     newComment.dataset.id = id;
     newComment.className = "video__comment";
-    const icon = document.createElement("i");
-    icon.className = "fas fa-comment";
     const span = document.createElement("span");
-    span.innerText = ` ${text}`;
+    span.innerText =` ${username}:&nbsp;`;
     const span2 = document.createElement("span");
-    span2.innerText = "❌";
-    newComment.appendChild(icon);
+    span2.innerText = ` ${text}`;
+    const button = document.createElement("button");
+    button.innerText = "Delete";
     newComment.appendChild(span);
     newComment.appendChild(span2);
+    newComment.appendChild(button);
     videoComments.prepend(newComment);
 };
 
-const handleSubmit = async (event) => {
+const createHandle = async (event) => {
     event.preventDefault();
-    const textarea = form.querySelector("textarea");
-    const text = textarea.value;
+    const inputText = createForm.querySelector("input[name='comments']");
+    const text = inputText.value;
     const videoId = videoContainer.dataset.id;
     if (text === "") {
         return;
@@ -34,15 +38,26 @@ const handleSubmit = async (event) => {
         body: JSON.stringify({ text })
     });
 
-    textarea.value = "";
+    inputText.value = "";
 
     if (response.status === 201) {
-        textarea.value = "";
-        const { newCommentId } = await response.json();
-        addComment(text, newCommentId);
+        inputText.value = "";
+        const { newCommentId, username } = await response.json();
+        addComment(text, newCommentId, username);
     }
 };
 
-if (form) {
-    form.addEventListener("submit", handleSubmit);
+const deleteHandle = (event) => {
+    console.log("comment delete before");
+
+
+
+}
+
+if (createForm) {
+    createForm.addEventListener("submit", createHandle);
+}
+
+if (deleteForm) {
+    deleteForm.addEventListener("submit", deleteHandle);
 }

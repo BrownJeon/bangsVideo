@@ -3,7 +3,7 @@ import Comment from "../models/Comment";
 import User from "../models/User";
 
 export const home = async (req, res) => {
-    console.log(req.session);
+    // console.log(req.session);
     const videos = await Video.find({})
         .sort({ createdAt: "desc" })
         .populate("owner");
@@ -12,11 +12,15 @@ export const home = async (req, res) => {
 
 export const watch = async (req, res) => {
     const { id } = req.params;
+    const {
+        user: { _id },
+    } = req.session;
     const video = await Video.findById(id).populate("owner").populate("comments");
+    console.log(video);
     if (!video) {
         return res.render("404", { pageTitle: "Video not found." });
     }
-    return res.render("watch", { pageTitle: video.title, video });
+    return res.render("watch", { pageTitle: video.title, video, userId: _id });
 };
 
 export const getEdit = async (req, res) => {
@@ -32,7 +36,7 @@ export const getEdit = async (req, res) => {
         console.log("페이지접근에 대하 권한 가지고있는 유저가 아닙니다.");
         return res.status(403).redirect("/");
     }
-    return res.render("edit", { pageTitle: `Edit: ${video.title}`, video });
+    return res.render("edit", { pageTitle: `Edit: ${video.title}`, video});
 };
 
 export const postEdit = async (req, res) => {
@@ -41,10 +45,13 @@ export const postEdit = async (req, res) => {
     } = req.session;
     const { id } = req.params;
     const { title, description, hashtags } = req.body;
-    const video = await Video.exists({ _id: id });
-    if (!video) {
+    const isExists = await Video.exists({ _id: id });
+    if (!isExists) {
         return res.status(404).render("404", { pageTitle: "Video not found." });
     }
+
+    const video = await Video.findById({_id: id});
+
     if (String(video.owner) !== String(_id)) {
         console.log(`video.owner:${video.owner} , _id:${_id}`);
 
@@ -146,9 +153,27 @@ export const createComment = async (req, res) => {
     const comment = await Comment.create({
         text,
         owner: user._id,
+        username: user.username,
         video: id,
     });
     video.comments.push(comment._id);
     video.save();
-    return res.status(201).json({ newCommentId: comment._id });
+    return res.status(201).json({ newCommentId: comment._id, username: user.username });
 };
+
+export const deleteComment = async (req, res) => {
+    const {params: {id}} = req;
+
+    console.log(id);
+
+    const comment = await Comment.findByIdAndDelete(id);
+    console.log(comment._id);
+
+    const video = await Video.findById(comment.video);
+    console.log(video.comments);
+
+    video.comments.remove(comment._id);
+    video.save();
+
+    return res.status(201);
+}

@@ -9,7 +9,7 @@ import {
     startGithubLogin,
     see
 } from "../controllers/userContoroller";
-import {avatarUpload, logoutMiddleware, protectorMiddleware, publicOnlyMiddleware} from "../middlewares";
+import {avatarUpload, protectorMiddleware, publicOnlyMiddleware} from "../middlewares";
 
 const userRouter = express.Router();
 
